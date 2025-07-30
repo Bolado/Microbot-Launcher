@@ -4,6 +4,7 @@ body {
     font-family: Arial, sans-serif;
     background-color: #1a1d29;
     color: white;
+    border-radius: 20px;
 }
 
 .container {
@@ -49,6 +50,18 @@ body {
     height: auto;
     border-radius: 8px;
     margin-bottom: 20px;
+}
+
+.featured {
+    display: flex;
+    position: fixed;
+    width: 100%;
+    background: #1a1d29;
+    bottom: 0;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0px 0px 10px 3px #000000d1;
+    z-index: 100;
 }
 
 h2 {
@@ -276,17 +289,28 @@ h2 {
 }
 
 #loader-container {
-    display:none;
-}
-
-
-.splash-image {
-
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    background: #242a3b;
+    z-index: 125;
+    width: 40%;
+    margin: 1rem;
+    border-radius: 10px;
+    box-shadow: 3px 3px 3px 3px #00000040;
+    padding: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 
 #update-available {
     display:none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-actions {
@@ -305,6 +329,11 @@ h2 {
     cursor: pointer;
     margin-bottom: 20px;
     width: 200px;
+
+    transition: scale 0.3s ease;
+    &:hover {
+        scale: 1.02;
+    }
 }
 
 #update-now-btn {
@@ -317,6 +346,11 @@ h2 {
     cursor: pointer;
     margin-bottom: 20px;
     width: 200px;
+
+    transition: scale 0.3s ease;
+    &:hover {
+        scale: 1.02;
+    }
 }
 
 .loadingButton {
@@ -347,7 +381,54 @@ h2 {
     animation: spin 1s linear infinite;
 }
 
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.titlebar {
+  height: 30px;
+  background: #242a3b;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  app-region: drag;
+  width: 100%;
+  padding: 0%;
+
+  .titlebar-title {
+    position: absolute;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  .titlebar-controls {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  button {
+    background: transparent;
+    border: none;
+    color: white;
+    margin-left: 0.5rem;
+    font-size: 20px;
+    cursor: pointer;
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
 }

@@ -127,5 +127,16 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-jcef-bundle
+
 microbot-*.jar
+
+BrowserMetrics/
+Crashpad/
+segmentation_platform/
+ShaderCache/
+GEMINI.md
+Last Version
+Local State
+Variations
+...
+package-lock.json
