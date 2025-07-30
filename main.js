@@ -14,7 +14,8 @@ process.on("uncaughtException", (error) => {
   log.error("Uncaught Exception:", error);
 });
 
-let mainWindow;
+let mainWindow = null;
+
 // Ensure the .microbot directory exists
 if (!fs.existsSync(microbotDir)) {
   fs.mkdirSync(microbotDir);
@@ -39,6 +40,8 @@ async function loadLibraries() {
       shell: shell,
       projectDir: __dirname,
       fs: fs,
+      app: app,
+      mainWindow: mainWindow,
     };
     if (typeof handler === "function") {
       await handler(deps);
@@ -67,6 +70,12 @@ async function createWindow() {
     titleBarStyle: "hidden",
     frame: false,
   });
+  const extraHandlers = require(path.join(
+    __dirname,
+    "libs/extra-ipc-handlers.js"
+  ));
+  extraHandlers(app, ipcMain, mainWindow);
+
   await mainWindow.loadFile(path.join(__dirname, "index.html"));
 }
 

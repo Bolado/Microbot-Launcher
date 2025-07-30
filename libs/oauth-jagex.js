@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const axios = require("axios");
 const fs = require("fs").promises;
 const path = require("path");
-const { getBrowserExecutablePath } = require("./browser-downloader");
+const { getAvailableBrowser } = require("./browser-util.js");
 
 const userHome = process.env.HOME || process.env.USERPROFILE;
 const ACCOUNTS_DIR = path.join(userHome, ".microbot");
@@ -212,9 +212,15 @@ async function writeAccountsToFile(sessionId) {
  */
 async function startAuthFlow() {
   return new Promise(async (resolve, reject) => {
+    const availableBrowser = await getAvailableBrowser();
+
+    if (!availableBrowser) {
+      return reject(new Error("No supported browser found on the system."));
+    }
+
     const browser = await chromium.launch({
       headless: false,
-      executablePath: await getBrowserExecutablePath(),
+      executablePath: availableBrowser.executable,
     });
     const context = await browser.newContext();
     const page = await context.newPage();

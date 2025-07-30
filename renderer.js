@@ -132,15 +132,7 @@ window.addEventListener("load", async () => {
       await openClient(selectedVersion, proxy);
     } else {
       document.getElementById("play").classList.add("disabled");
-      const isDownloaded = await window.electron.isBrowserDownloaded();
-      if (isDownloaded) {
-        await window.electron.startAuthFlow();
-      } else {
-        document.getElementById("loader-container").style.display = "block";
-        await window.electron.downloadAndExtractBrowser();
-        document.getElementById("loader-container").style.display = "none";
-        await window.electron.startAuthFlow();
-      }
+      await window.electron.startAuthFlow();
       document.getElementById("play").classList.remove("disabled");
     }
   });
@@ -321,10 +313,25 @@ async function setVersionPreference(properties) {
     });
 }
 
+async function titlebarButtons() {
+  document.getElementById("minimize-btn").addEventListener("click", () => {
+    window.electron.minimizeWindow();
+  });
+
+  document.getElementById("maximize-btn").addEventListener("click", () => {
+    window.electron.maximizeWindow();
+  });
+
+  document.getElementById("close-btn").addEventListener("click", () => {
+    window.electron.closeLauncher();
+  });
+}
+
 async function initUI(properties) {
   updateNowBtn();
   reminderMeLaterBtn();
   playNoJagexAccount();
+  titlebarButtons();
   const listOfJars = await window.electron.listJars();
   populateSelectElement("client", listOfJars);
   await setVersionPreference(properties);

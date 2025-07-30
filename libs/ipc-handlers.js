@@ -8,34 +8,18 @@ module.exports = async function (deps) {
     log,
     fs,
     projectDir,
+    app,
   } = deps;
 
   const url = "https:/microbot.cloud";
   const filestorage = "https://files.microbot.cloud";
 
   const { startAuthFlow } = require("./oauth-jagex.js");
-  const {
-    downloadAndExtractBrowser,
-    isBrowserDownloaded,
-  } = require("./browser-downloader.js");
+  const { isBrowserDownloaded } = require("./browser-util.js");
 
   ipcMain.handle("start-auth-flow", async () => {
     try {
       await startAuthFlow();
-      return { success: true };
-    } catch (error) {
-      log.error(error.message);
-      return { error: error.message };
-    }
-  });
-
-  ipcMain.handle("download-and-extract-browser", async (event) => {
-    try {
-      if (!(await isBrowserDownloaded())) {
-        await downloadAndExtractBrowser((percent, status) => {
-          event.sender.send("progress", { percent, status });
-        });
-      }
       return { success: true };
     } catch (error) {
       log.error(error.message);
