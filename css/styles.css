@@ -310,7 +310,8 @@ h2 {
     box-shadow: 3px 3px 3px 3px #00000040;
     padding: 2rem;
     left: 50%;
-    transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 
