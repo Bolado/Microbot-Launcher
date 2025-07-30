@@ -29,6 +29,7 @@
     "adm-zip": "^0.5.15",
     "applicationinsights": "^2.9.6",
     "axios": "^1.7.2",
+    "detect-browsers": "^6.1.0",
     "electron-log": "^5.4.1",
     "electron-updater": "^6.1.8",
     "patchright": "^1.52.5",
