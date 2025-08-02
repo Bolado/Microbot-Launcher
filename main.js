@@ -70,6 +70,9 @@ async function createWindow() {
     titleBarStyle: "hidden",
     frame: false,
   });
+  if (process.platform === "darwin") {
+    mainWindow.setWindowButtonVisibility(false);
+  }
   const extraHandlers = require(path.join(
     __dirname,
     "libs/extra-ipc-handlers.js"
