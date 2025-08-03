@@ -20,6 +20,10 @@ module.exports = async function (deps) {
                 '-proxy=' + proxy.proxyIp,
                 '-proxy-type=' + proxy.proxyType
             ];
+            if (process.platform === "darwin") {
+                commandArgs.unshift('--add-opens=java.desktop/com.apple.eawt=ALL-UNNAMED');
+                commandArgs.unshift('--add-opens=java.desktop/sun.awt=ALL-UNNAMED');
+            }
             checkJavaAndRunJar(
                 commandArgs,
                 dialog,
@@ -39,8 +43,12 @@ module.exports = async function (deps) {
             '-clean-jagex-launcher',
             '-proxy=' + proxy.proxyIp,
             '-proxy-type=' + proxy.proxyType
-            
+
         ];
+        if (process.platform === "darwin") {
+            commandArgs.unshift('--add-opens=java.desktop/com.apple.eawt=ALL-UNNAMED');
+            commandArgs.unshift('--add-opens=java.desktop/sun.awt=ALL-UNNAMED');
+        }
         checkJavaAndRunJar(
             commandArgs,
             dialog,
@@ -117,7 +125,7 @@ module.exports = async function (deps) {
 
     ipcMain.handle('open-launcher', async () => {
         try {
-            
+
             const launcherPath = path.join(microbotDir, 'microbot-launcher.jar');
             checkJavaAndRunJar(
                 [

@@ -244,9 +244,11 @@ function playNoJagexAccount() {
 
 async function downloadClientIfNotExist(version) {
   if (!(await window.electron.clientExists(version))) {
+    window.electron.logError(`Client ${version} does not exist. Downloading...`);
     document.getElementById("loader-container").style.display = "block";
     await window.electron.downloadClient(version);
   }
+  window.electron.logError(`Client ${version} is ready.`);
 }
 
 function updateNowBtn() {

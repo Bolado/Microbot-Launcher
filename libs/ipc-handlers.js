@@ -75,6 +75,8 @@ module.exports = async function (deps) {
   });
 
   ipcMain.handle("download-client", async (event, version) => {
+    version = String(version).replace(".jar", "");
+    const url = `${filestorage}/releases/microbot/stable/microbot-${version}.jar`;
     try {
       event.sender.send("progress", {
         percent: 90,
@@ -84,11 +86,7 @@ module.exports = async function (deps) {
         return { success: true, path: "microbot-" + version + ".jar" };
       const response = await axios({
         method: "get",
-        url:
-          filestorage +
-          "/releases/microbot/stable/microbot-" +
-          version +
-          ".jar",
+        url: url,
         responseType: "arraybuffer",
         onDownloadProgress: (progressEvent) => {
           const totalLength = 126009591;
@@ -107,7 +105,7 @@ module.exports = async function (deps) {
       event.sender.send("progress", { percent: 100, status: "Completed!" });
       return { success: true, path: filePath };
     } catch (error) {
-      log.error(error.message);
+      log.error(`Error downloading client ${version} from ${url}:`, error.message);
       return { error: error.message };
     }
   });
