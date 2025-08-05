@@ -220,7 +220,9 @@ function logoutButton() {
 function addAccountsButton() {
   const addAccounts = document.getElementById("add-accounts");
   addAccounts?.addEventListener("click", async () => {
-    await openLauncher();
+        document.getElementById("add-accounts").classList.add("disabled");
+        await window.electron.startAuthFlow();
+        document.getElementById("add-accounts").classList.remove("disabled");
   });
 }
 
