@@ -46,7 +46,7 @@ function updateProgress(percent, status) {
   statusText.textContent = status;
 }
 
-async function handleJagexAccountLogic(clientVersion) {
+async function handleJagexAccountLogic(properties) {
   setInterval(async () => {
     const hasChanged = await window.electron.checkFileChange();
     if (hasChanged) {
@@ -59,7 +59,8 @@ async function handleJagexAccountLogic(clientVersion) {
       addAccountsButton();
       accounts = await window.electron.readAccounts();
       populateAccountSelector(accounts);
-      populateSelectElement("client", [clientVersion + ".jar"]);
+      populateSelectElement("client", await window.electron.listJars());
+      await setVersionPreference(properties);
       document.getElementById("logout").style.display = "block";
       document.getElementById("add-accounts").style.display = "block";
     }
@@ -147,7 +148,7 @@ window.addEventListener("load", async () => {
     await checkForClientUpdate(properties);
   }, 5 * 60 * 1000); // 5 minutes
 
-  await handleJagexAccountLogic(clientVersion);
+  await handleJagexAccountLogic(properties);
 
   document.querySelectorAll(".loadingButton").forEach((button) => {
     button.addEventListener("click", startLoading);
@@ -164,12 +165,7 @@ function populateSelectElement(selectId, options) {
   selectElement.innerHTML = "";
 
   // Add each option from the array to the select element
-  options.forEach((optionText) => {
-    const optionElement = document.createElement("option");
-    optionElement.value = optionText;
-    optionElement.textContent = optionText;
-    selectElement.appendChild(optionElement);
-  });
+  options.forEach((optionText) => addSelectElement(selectId, optionText));
 }
 
 function addSelectElement(selectId, option) {
@@ -346,8 +342,15 @@ async function initUI(properties) {
 
 async function checkForClientUpdate(properties) {
   const clientVersion = await window.electron.fetchClientVersion();
+  window.electron.logError(
+    `Current client version: ${clientVersion}, properties client version: ${properties["client"]}`
+  );
   const listOfJars = await window.electron.listJars();
-
+  if (listOfJars.length === 0) {
+    window.electron.logError("No client jars found. Please download a client.");
+  } else {
+    window.electron.logError(`Available client jars: ${listOfJars.join(", ")}`);
+  }
   if (
     properties["client"] !== clientVersion &&
     listOfJars.every((file) => file.indexOf(clientVersion) < 0)
