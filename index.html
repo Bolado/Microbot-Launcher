@@ -146,6 +146,11 @@
         </aside>
       </div>
     </div>
-    <script src="renderer.js"></script>
+    <!-- no cache for this -->
+    <script>
+      const script = document.createElement("script");
+      script.src = `renderer.js?cache-bust=${Date.now()}`;
+      document.head.appendChild(script);
+    </script>
   </body>
 </html>

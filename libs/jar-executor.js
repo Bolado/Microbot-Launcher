@@ -77,7 +77,7 @@ module.exports = async function (deps) {
     function executeJar(commandArgs, dialog) {
         log.info(`java ${commandArgs.join(' ')}`);
 
-        const jarProcess = spawn('java', commandArgs);
+        const jarProcess = spawn('java', commandArgs, { detached: true });
 
         jarProcess.stdout.on('data', (data) => {
             log.info(`[stdout] ${data}`);
