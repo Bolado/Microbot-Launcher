@@ -124,12 +124,17 @@
               height="100"
             />
           </div>
-          <button id="play-no-jagex-account" class="play-button loadingButton">
-            Play Normal Account
-          </button>
-          <button id="play" class="play-button loadingButton">
-            Login Jagex Account
-          </button>
+          <div class="play-buttons">
+            <button
+              id="play-no-jagex-account"
+              class="play-button loadingButton"
+            >
+              Play Normal Account
+            </button>
+            <button id="play" class="play-button loadingButton">
+              Login Jagex Account
+            </button>
+          </div>
           <button id="add-accounts" class="add-accounts loadingButton">
             Add accounts
           </button>
@@ -141,6 +146,10 @@
             <select id="client"></select>
             <label for="character">Jagex Account</label>
             <select id="character"></select>
+            <label for="profile">Profile</label>
+            <select id="profile">
+              <option value="default">Default</option>
+            </select>
           </div>
           <div class="proxy-section">
             <label for="proxy-ip"

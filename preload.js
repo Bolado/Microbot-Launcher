@@ -23,7 +23,11 @@ contextBridge.exposeInMainWorld("electron", {
     ipcRenderer.invoke("open-client", version, proxy),
   readAccounts: () => ipcRenderer.invoke("read-accounts"),
   removeAccounts: () => ipcRenderer.invoke("remove-accounts"),
-
+  setProfileJagexAccount: (account, profile) =>
+    ipcRenderer.invoke("set-profile-jagex", account, profile),
+  setProfileNoJagexAccount: (profile) =>
+    ipcRenderer.invoke("set-profile-no-jagex", profile),
+  readNonJagexProfile: () => ipcRenderer.invoke("read-non-jagex-profile"),
   clientExists: (version) => ipcRenderer.invoke("client-exists", version),
   launcherExists: () => ipcRenderer.invoke("launcher-exists"),
   overwriteCredentialProperties: (character) =>
@@ -32,6 +36,7 @@ contextBridge.exposeInMainWorld("electron", {
   playNoJagexAccount: (version, proxy) =>
     ipcRenderer.invoke("play-no-jagex-account", version, proxy),
   listJars: () => ipcRenderer.invoke("list-jars"),
+  listProfiles: () => ipcRenderer.invoke("list-profiles"),
   launcherVersion: () => ipcRenderer.invoke("launcher-version"),
   logError: (message) => ipcRenderer.invoke("log-error", message),
   ipcRenderer: {

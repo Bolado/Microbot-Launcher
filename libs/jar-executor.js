@@ -7,11 +7,12 @@ module.exports = async function (deps) {
         dialog,
         shell,
         log,
+        fs,
         microbotDir,
         ipcMain
     } = deps
 
-    ipcMain.handle('open-client', async (event, version, proxy) => {
+    ipcMain.handle('open-client', async (event, version, proxy, account) => {
         try {
             const jarPath = path.join(microbotDir, 'microbot-' + version + ".jar");
             const commandArgs = [
@@ -20,6 +21,13 @@ module.exports = async function (deps) {
                 '-proxy=' + proxy.proxyIp,
                 '-proxy-type=' + proxy.proxyType
             ];
+            if (account) {
+                const accounts = await window.electron.readAccounts();
+                const selectedAccount = accounts?.find((x) => x.accountId === account);
+                if (selectedAccount) {
+                    commandArgs.push(`-profile=${selectedAccount.profile}`);
+                }
+            }
             if (process.platform === "darwin") {
                 commandArgs.unshift('--add-opens=java.desktop/com.apple.eawt=ALL-UNNAMED');
                 commandArgs.unshift('--add-opens=java.desktop/sun.awt=ALL-UNNAMED');
@@ -45,6 +53,12 @@ module.exports = async function (deps) {
             '-proxy-type=' + proxy.proxyType
 
         ];
+        if (fs.existsSync(path.join(microbotDir, "non-jagex-preferred-profile.json"))) {
+            const profileData = JSON.parse(fs.readFileSync(path.join(microbotDir, "non-jagex-preferred-profile.json"), 'utf8'));
+            if (profileData.profile && profileData.profile !== "default") {
+                commandArgs.push(`-profile=${profileData.profile}`);
+            }
+        }
         if (process.platform === "darwin") {
             commandArgs.unshift('--add-opens=java.desktop/com.apple.eawt=ALL-UNNAMED');
             commandArgs.unshift('--add-opens=java.desktop/sun.awt=ALL-UNNAMED');

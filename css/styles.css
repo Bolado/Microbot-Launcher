@@ -123,7 +123,6 @@ h2 {
 .game-logo img {
     width: 200px;
     height: auto;
-    margin-bottom: 20px;
 }
 
 .refresh-btn {
@@ -148,6 +147,13 @@ h2 {
     font-size: 16px;
     cursor: pointer;
     margin-bottom: 20px;
+    width: 100%;
+}
+
+.play-buttons {
+    display: block;
+    flex-direction: row;
+    gap: 10px;
     width: 100%;
 }
 

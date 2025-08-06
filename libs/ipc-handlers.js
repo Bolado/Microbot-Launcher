@@ -74,8 +74,13 @@ module.exports = async function (deps) {
     }
   });
 
+  // Utility function to normalize version strings
+  function normalizeVersion(version) {
+    return String(version).replace(".jar", "").replace("microbot-", "");
+  }
+
   ipcMain.handle("download-client", async (event, version) => {
-    version = String(version).replace(".jar", "");
+    version = normalizeVersion(version);
     const url = `${filestorage}/releases/microbot/stable/microbot-${version}.jar`;
     try {
       event.sender.send("progress", {
@@ -198,6 +203,56 @@ module.exports = async function (deps) {
         file.endsWith(".jar") &&
         regex.test(file)
     );
+  });
+
+  /*
+   * Read the profiles from the %USERPROFILE%/.runelite/profiles.json
+   * and filter out profiles with negative ID, returning the name strings
+   * so that the frontend can populate the profile select element
+   */
+  ipcMain.handle("list-profiles", async () => {
+    const user = process.env.USERPROFILE || process.env.HOME;
+    const profilesPath = path.join(
+      user,
+      ".runelite",
+      "microbot-profiles",
+      "profiles.json"
+    );
+    if (fs.existsSync(profilesPath)) {
+      try {
+        const data = fs.readFileSync(profilesPath, "utf8");
+        const object = JSON.parse(data);
+        return object.profiles
+          .filter((profile) => profile.id > 0)
+          .map((profile) => profile.name);
+      } catch (error) {
+        log.error(error.message);
+        return { error: error.message };
+      }
+    } else {
+      log.error("Profiles file does not exist");
+      return { error: "Profiles file does not exist" };
+    }
+  });
+
+  ipcMain.handle("read-non-jagex-profile", async () => {
+    const profileFilePath = path.join(
+      microbotDir,
+      "non-jagex-preferred-profile.json"
+    );
+    if (fs.existsSync(profileFilePath)) {
+      try {
+        const data = fs.readFileSync(profileFilePath, "utf8");
+        const profile = JSON.parse(data);
+        return profile?.profile;
+      } catch (error) {
+        log.error(error.message);
+        return { error: error.message };
+      }
+    } else {
+      log.error("Non-Jagex profile file does not exist");
+      return { error: "Non-Jagex profile file does not exist" };
+    }
   });
 
   ipcMain.handle("launcher-version", async () => {

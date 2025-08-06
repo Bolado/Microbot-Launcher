@@ -22,9 +22,9 @@ async function openClient(version) {
     if (regex) {
       const version = regex[0];
       console.log(version[0]);
-      await window.electron.openClient(version, proxy);
+      await window.electron.openClient(version, proxy, selectedAccount);
     } else {
-      await window.electron.openClient(selectedVersion, proxy);
+      await window.electron.openClient(selectedVersion, proxy, selectedAccount);
     }
   } else {
     alert("Account not found. Please restart your client.");
@@ -50,19 +50,17 @@ async function handleJagexAccountLogic(properties) {
   setInterval(async () => {
     const hasChanged = await window.electron.checkFileChange();
     if (hasChanged) {
-      document.getElementById("play").innerHTML = "Play With Jagex Account";
-      document.getElementById("logout").style.display = "block";
-      document.getElementById("add-accounts").style.display = "block";
       accounts = await window.electron.readAccounts();
-      populateAccountSelector(accounts);
-      logoutButton();
-      addAccountsButton();
-      accounts = await window.electron.readAccounts();
-      populateAccountSelector(accounts);
+      const selectedProfile = document.getElementById("profile")?.value;
+
+      setupSidebarLayout(accounts.length);
+
       populateSelectElement("client", await window.electron.listJars());
+      populateProfileSelector(
+        await window.electron.listProfiles(),
+        selectedProfile
+      );
       await setVersionPreference(properties);
-      document.getElementById("logout").style.display = "block";
-      document.getElementById("add-accounts").style.display = "block";
     }
   }, 1000);
 }
@@ -98,7 +96,8 @@ window.addEventListener("load", async () => {
 
   const microbotLauncherVersion = await window.electron.launcherVersion();
 
-  document.title = "Microbot Launcher " + microbotLauncherVersion;
+  document.querySelector(".titlebar-title").innerText =
+    "Microbot Launcher - " + microbotLauncherVersion;
 
   if (properties["launcher"] !== launcherVersion) {
     document.getElementById("loader-container").style.display = "block";
@@ -137,6 +136,52 @@ window.addEventListener("load", async () => {
       document.getElementById("play").classList.remove("disabled");
     }
   });
+
+  /*
+   * Whenever the profile select changes, we set the "preferred" profile on accounts.json
+   * for the current selected account, if no jagex account is selected, we set on
+   * the non-jagex-preferred-profile.json
+   */
+  document
+    .getElementById("profile")
+    .addEventListener("change", async (event) => {
+      const selectedProfile = event.target.value;
+      const selectedAccount = document.getElementById("character")?.value;
+      if (selectedAccount && selectedAccount !== "none") {
+        await window.electron.setProfileJagexAccount(
+          selectedAccount,
+          selectedProfile
+        );
+      } else {
+        await window.electron.setProfileNoJagexAccount(selectedProfile);
+      }
+    });
+
+  /*
+   * Whenever the character select changes, we attempt to set the "preferred" profile
+   * for the selected account if it exists, otherwise we set the profile
+   * to the default
+   */
+  document
+    .getElementById("character")
+    .addEventListener("change", async (event) => {
+      const selectedAccount = event.target.value;
+      const accounts = await window.electron.readAccounts();
+
+      if (selectedAccount && selectedAccount !== "none") {
+        const account = accounts.find((x) => x.accountId === selectedAccount);
+        if (account) {
+          const profile = account.profile || "default";
+          document.getElementById("profile").value = profile;
+        }
+      } else {
+        // If no account is selected, set the profile to the preferred non-Jagex account profile
+        // If no profile is set, default to "default"
+        const nonJagexProfile = await window.electron.readNonJagexProfile();
+        const profile = nonJagexProfile || "default";
+        document.getElementById("profile").value = profile;
+      }
+    });
 
   //Init buttons and UI
   await initUI(properties);
@@ -183,12 +228,41 @@ function addSelectElement(selectId, option) {
   selectElement.appendChild(newOption);
 }
 
-function populateAccountSelector(characters = []) {
+function populateProfileSelector(profiles = [], selectedProfile = null) {
+  // Get the select element by its ID
+  const profileSelect = document.getElementById("profile");
+
+  // Clear any existing options (optional)
+  profileSelect.innerHTML = "";
+
+  // Create a default "default" option
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "default";
+  defaultOption.textContent = "Default";
+  profileSelect.appendChild(defaultOption);
+
+  // Iterate over the profiles array and create option elements
+  profiles.forEach((profile) => {
+    addSelectElement("profile", profile);
+  });
+
+  if (selectedProfile) {
+    profileSelect.value = selectedProfile;
+  }
+}
+
+function populateAccountSelector(characters = [], selectedAccount = null) {
   // Get the select element by its ID
   const characterSelect = document.getElementById("character");
 
   // Clear any existing options (optional)
   characterSelect.innerHTML = "";
+
+  // Create a default "none" option
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "none";
+  defaultOption.textContent = "None";
+  characterSelect.appendChild(defaultOption);
 
   // Iterate over the characters array and create option elements
   characters.forEach((character) => {
@@ -197,9 +271,13 @@ function populateAccountSelector(characters = []) {
     option.textContent = character.displayName; // Set displayName as the text
     characterSelect.appendChild(option); // Add the option to the select element
   });
+
+  if (selectedAccount) {
+    characterSelect.value = selectedAccount;
+  }
 }
 
-function logoutButton() {
+function setupLogoutButton() {
   const logoutBtn = document.getElementById("logout");
   logoutBtn?.addEventListener("click", async () => {
     const userConfirmed = confirm("Are you sure you want to proceed?");
@@ -213,9 +291,38 @@ function logoutButton() {
   });
 }
 
-function addAccountsButton() {
-  const addAccounts = document.getElementById("add-accounts");
-  addAccounts?.addEventListener("click", async () => {
+function setupSidebarLayout(amountOfAccounts) {
+  const selectedAccount = document.getElementById("character")?.value;
+  const playJagexButton = document.getElementById("play");
+  const playButtonsDiv = document.querySelector(".play-buttons");
+  const logoutButton = document.getElementById("logout");
+  const addAccountsButton = document.getElementById("add-accounts");
+  const characterSelect = document.getElementById("character");
+  const characterSelectLabel = document.querySelector('label[for="character"]');
+
+  if (amountOfAccounts > 0) {
+    playJagexButton.innerHTML = "Play With Jagex Account";
+    logoutButton.style.display = "block";
+    playButtonsDiv.style.display = "flex";
+    characterSelectLabel.style.display = "block";
+    characterSelect.style.display = "block";
+    addAccountsButton.style.display = "block";
+    populateAccountSelector(accounts, selectedAccount);
+    setupLogoutButton();
+    setupAddAccountsButton();
+  } else {
+    playJagexButton.innerHTML = "Login Jagex Account";
+    logoutButton.style.display = "none";
+    playButtonsDiv.style.display = "none";
+    characterSelectLabel.style.display = "none";
+    characterSelect.style.display = "none";
+    addAccountsButton.style.display = "none";
+  }
+}
+
+function setupAddAccountsButton() {
+  const addAccountsButton = document.getElementById("add-accounts");
+  addAccountsButton?.addEventListener("click", async () => {
     document.getElementById("add-accounts").classList.add("disabled");
     await window.electron.startAuthFlow();
     document.getElementById("add-accounts").classList.remove("disabled");
@@ -229,6 +336,11 @@ function playNoJagexAccount() {
       const proxy = getProxyValues();
       const selectedVersion = document.getElementById("client").value;
       const regex = selectedVersion.match(/\d+\.\d+\.\d+(\.\d+)?/);
+
+      const selectedProfile =
+        document.getElementById("profile").value || "default";
+      await window.electron.setProfileNoJagexAccount(selectedProfile);
+
       if (regex) {
         const version = regex[0];
         await downloadClientIfNotExist(version + ".jar");
@@ -334,8 +446,12 @@ async function initUI(properties) {
   reminderMeLaterBtn();
   playNoJagexAccount();
   titlebarButtons();
-  const listOfJars = await window.electron.listJars();
-  populateSelectElement("client", listOfJars);
+
+  const accounts = await window.electron.readAccounts();
+  await setupSidebarLayout(accounts.length || 0);
+
+  populateSelectElement("client", await window.electron.listJars());
+  populateSelectElement("profile", await window.electron.listProfiles());
   await setVersionPreference(properties);
   document.querySelector(".game-info").style = "display:block";
 }
