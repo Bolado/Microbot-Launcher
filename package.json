@@ -47,7 +47,9 @@
       "package.json",
       "!**/*.map",
       "images/**",
-      "libs/dir-module.js"
+      "libs/**",
+      "index.html",
+      "css/**"
     ],
     "directories": {
       "buildResources": "build"
