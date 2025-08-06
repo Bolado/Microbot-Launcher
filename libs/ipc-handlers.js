@@ -105,7 +105,10 @@ module.exports = async function (deps) {
       event.sender.send("progress", { percent: 100, status: "Completed!" });
       return { success: true, path: filePath };
     } catch (error) {
-      log.error(`Error downloading client ${version} from ${url}:`, error.message);
+      log.error(
+        `Error downloading client ${version} from ${url}:`,
+        error.message
+      );
       return { error: error.message };
     }
   });
@@ -131,13 +134,34 @@ module.exports = async function (deps) {
   });
 
   ipcMain.handle("fetch-launcher-html-version", async () => {
-    try {
-      const response = await axios.get(url + "/api/file/html");
-      return response.data;
-    } catch (error) {
-      log.error(error.message);
-      return { error: error.message };
-    }
+    // uncomment the following code if you want to enable fetching launcher.html version
+    // and also make sure to update the url
+    //
+    // try {
+    //   const response = await axios.get(url + "/api/file/html");
+    //   return response.data;
+    // } catch (error) {
+    //   log.error(error.message);
+    //   return { error: error.message };
+    // }
+  });
+
+  ipcMain.handle("download-launcher-html", async () => {
+    // uncomment the following code if you want to enable downloading launcher.html
+    // and also make sure to update the url
+    //
+    // try {
+    //   const response = await axios.get(
+    //     filestorage + "/assets/microbot-launcher/launcher.html",
+    //     { responseType: "arraybuffer" }
+    //   );
+    //   const filePath = path.join(microbotDir, "launcher.html");
+    //   fs.writeFileSync(filePath, response.data);
+    //   return { success: true, path: filePath };
+    // } catch (error) {
+    //   log.error(error.message);
+    //   return { error: error.message };
+    // }
   });
 
   ipcMain.handle("client-exists", async (event, version) => {

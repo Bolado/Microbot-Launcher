@@ -220,9 +220,9 @@ function logoutButton() {
 function addAccountsButton() {
   const addAccounts = document.getElementById("add-accounts");
   addAccounts?.addEventListener("click", async () => {
-        document.getElementById("add-accounts").classList.add("disabled");
-        await window.electron.startAuthFlow();
-        document.getElementById("add-accounts").classList.remove("disabled");
+    document.getElementById("add-accounts").classList.add("disabled");
+    await window.electron.startAuthFlow();
+    document.getElementById("add-accounts").classList.remove("disabled");
   });
 }
 
@@ -246,7 +246,9 @@ function playNoJagexAccount() {
 
 async function downloadClientIfNotExist(version) {
   if (!(await window.electron.clientExists(version))) {
-    window.electron.logError(`Client ${version} does not exist. Downloading...`);
+    window.electron.logError(
+      `Client ${version} does not exist. Downloading...`
+    );
     document.getElementById("loader-container").style.display = "block";
     await window.electron.downloadClient(version);
   }

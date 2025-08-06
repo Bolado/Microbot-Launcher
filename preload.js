@@ -11,7 +11,7 @@ contextBridge.exposeInMainWorld("electron", {
   downloadMicrobotLauncher: () =>
     ipcRenderer.invoke("download-microbot-launcher"),
   downloadClient: (version) => ipcRenderer.invoke("download-client", version),
-  downloadLauncherHtml: () => ipcRenderer.invoke("download-client"),
+  downloadLauncherHtml: () => ipcRenderer.invoke("download-launcher-html"),
   readProperties: () => ipcRenderer.invoke("read-properties"),
   writeProperties: (data) => ipcRenderer.invoke("write-properties", data),
   fetchLauncherVersion: () => ipcRenderer.invoke("fetch-launcher-version"), //jagex launcher
