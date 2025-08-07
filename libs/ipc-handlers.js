@@ -74,21 +74,17 @@ module.exports = async function (deps) {
     }
   });
 
-  // Utility function to normalize version strings
-  function normalizeVersion(version) {
-    return String(version).replace(".jar", "").replace("microbot-", "");
-  }
 
   ipcMain.handle("download-client", async (event, version) => {
-    version = normalizeVersion(version);
     const url = `${filestorage}/releases/microbot/stable/microbot-${version}.jar`;
     try {
       event.sender.send("progress", {
         percent: 90,
         status: "Downloading Microbot-" + version + "",
       });
-      if (fs.existsSync("microbot-" + version + ".jar"))
-        return { success: true, path: "microbot-" + version + ".jar" };
+      if (fs.existsSync(path.join(microbotDir, `microbot-${version}.jar`))) {
+        return { success: true, path: path.join(microbotDir, `microbot-${version}.jar`) };
+      }
       const response = await axios({
         method: "get",
         url: url,
@@ -105,7 +101,7 @@ module.exports = async function (deps) {
           });
         },
       });
-      const filePath = path.join(microbotDir, "microbot-" + version + ".jar");
+      const filePath = path.join(microbotDir, `microbot-${version}.jar`);
       fs.writeFileSync(filePath, response.data);
       event.sender.send("progress", { percent: 100, status: "Completed!" });
       return { success: true, path: filePath };
@@ -171,7 +167,7 @@ module.exports = async function (deps) {
 
   ipcMain.handle("client-exists", async (event, version) => {
     try {
-      const filePath = path.join(microbotDir, "microbot-" + version);
+      const filePath = path.join(microbotDir, `microbot-${version}.jar`);
       log.info(filePath);
       return fs.existsSync(filePath);
     } catch (error) {

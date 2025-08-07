@@ -1,7 +1,8 @@
 let accounts = [];
 let iii = null;
 
-async function openClient(version) {
+async function openClient() {
+  const version = extractVersion(document.getElementById("client").value);
   await downloadClientIfNotExist(version);
 
   const proxy = getProxyValues();
@@ -17,15 +18,7 @@ async function openClient(version) {
   const selectedAccount = accounts?.find((x) => x.accountId === selectedValue);
   if (selectedAccount) {
     await window.electron.overwriteCredentialProperties(selectedAccount);
-    const selectedVersion = document.getElementById("client").value;
-    const regex = selectedVersion.match(/\d+\.\d+\.\d+(\.\d+)?/);
-    if (regex) {
-      const version = regex[0];
-      console.log(version[0]);
-      await window.electron.openClient(version, proxy, selectedAccount);
-    } else {
-      await window.electron.openClient(selectedVersion, proxy, selectedAccount);
-    }
+    await window.electron.openClient(version, proxy, selectedAccount);
   } else {
     alert("Account not found. Please restart your client.");
   }
@@ -127,9 +120,7 @@ window.addEventListener("load", async () => {
       document.getElementById("play")?.innerText.toLowerCase() ===
       "Play With Jagex Account".toLowerCase()
     ) {
-      const proxy = getProxyValues();
-      const selectedVersion = document.getElementById("client").value;
-      await openClient(selectedVersion, proxy);
+      await openClient();
     } else {
       document.getElementById("play").classList.add("disabled");
       await window.electron.startAuthFlow();
@@ -329,26 +320,30 @@ function setupAddAccountsButton() {
   });
 }
 
+/**
+ * Extracts the version number from a string.
+ * e.g., "microbot-1.1.1.1.jar" becomes "1.9.6.1"
+ * @param {string} versionString - The string containing the version.
+ * @returns {string} The extracted version number.
+ */
+function extractVersion(versionString) {
+    return versionString.replace(/^microbot-/, "").replace(/\.jar$/, "");
+}
+
 function playNoJagexAccount() {
   document
     .querySelector("#play-no-jagex-account")
     .addEventListener("click", async () => {
       const proxy = getProxyValues();
       const selectedVersion = document.getElementById("client").value;
-      const regex = selectedVersion.match(/\d+\.\d+\.\d+(\.\d+)?/);
+      const version = extractVersion(selectedVersion);
 
       const selectedProfile =
         document.getElementById("profile").value || "default";
       await window.electron.setProfileNoJagexAccount(selectedProfile);
 
-      if (regex) {
-        const version = regex[0];
-        await downloadClientIfNotExist(version + ".jar");
-        await window.electron.playNoJagexAccount(version, proxy);
-      } else {
-        await downloadClientIfNotExist(version);
-        await window.electron.playNoJagexAccount(selectedVersion, proxy);
-      }
+      await downloadClientIfNotExist(version);
+      await window.electron.playNoJagexAccount(version, proxy);
     });
 }
 
