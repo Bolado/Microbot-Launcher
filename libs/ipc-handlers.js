@@ -223,7 +223,7 @@ module.exports = async function (deps) {
         const data = fs.readFileSync(profilesPath, "utf8");
         const object = JSON.parse(data);
         return object.profiles
-          .filter((profile) => profile.id > 0)
+          .filter((profile) => profile.id > 0 && profile.name !== "default")
           .map((profile) => profile.name);
       } catch (error) {
         log.error(error.message);
