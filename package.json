@@ -84,8 +84,7 @@
                 {
                     "x": 200,
                     "y": 400,
-                    "type": "file",
-                    "path": "Microbot Launcher.app"
+                    "type": "file"
                 },
                 {
                     "x": 400,
